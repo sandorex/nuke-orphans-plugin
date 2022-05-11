@@ -1,4 +1,9 @@
-/* Sets all the text color to red! */
-body {
-    color: red;
+.trash-file-modal-text {
+    /* makes the files list much nicer as the text isnt mushed together */
+    line-height: 10px;
+}
+
+.modal-confirm-button {
+    /* make the confirm button align to the right */
+    float: right;
 }
