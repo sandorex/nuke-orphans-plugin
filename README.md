@@ -17,4 +17,3 @@ If there are none they are deleted when command `nuke-orphans` is ran
 Copy following files into `.obsidian/plugin/nuke-orphans/`
 - `main.js`
 - `manifest.json`
-- `styles.css`
