@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, TextComponent } from "obsidian";
+import { App, Notice, PluginSettingTab, Setting, TextComponent } from "obsidian";
 import NukeOrphansPlugin from "./main";
 
 export interface NukeOrphansSettings {
@@ -25,14 +25,15 @@ export class NukeOrhpansSettingsTab extends PluginSettingTab {
 		containerEl.createEl("h3", {
 			attr: {
 				"style": "text-align: center;",
-			}, text: "Nuke Orphans Plugin Settings"
+			},
+			text: "Nuke Orphans Plugin Settings"
 		});
 
 		var textEl: TextComponent = null;
 		new Setting(containerEl)
 			.setName("Attachment Folder")
 			.setDesc("Where attachments are stored")
-			.addText(text => {
+			.addText(text =>
 				text.setPlaceholder(DEFAULT_SETTINGS.attachmentsPath)
 					.setValue(this.plugin.settings.attachmentsPath)
 					.onChange(async (value) => {
@@ -44,12 +45,7 @@ export class NukeOrhpansSettingsTab extends PluginSettingTab {
 							this.plugin.settings.attachmentsPath = value;
 
 						await this.plugin.saveSettings();
-					})
-
-				textEl = text;
-
-				return text;
-			})
+					}))
 			.addButton(btn => {
 				btn.setButtonText("From config")
 					.setCta()
@@ -63,8 +59,10 @@ export class NukeOrhpansSettingsTab extends PluginSettingTab {
 							this.plugin.settings.attachmentsPath = this.app.vault.config.attachmentFolderPath;
 							await this.plugin.saveSettings();
 
-							textEl.setValue(this.plugin.settings.attachmentsPath)
+							// refresh the tab so that the updated value is shown
+							this.display();
 						} else {
+							new Notice("Could not read attachmentFolderPath from config")
 							console.error("Could not read attachmentFolderPath from obsidian config")
 						}
 					})

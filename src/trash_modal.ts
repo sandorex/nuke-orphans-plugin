@@ -11,21 +11,24 @@ export class TrashFilesModal extends Modal {
 		let { contentEl, titleEl } = this;
 		titleEl.setText("Move " + this.files.length + " files to obsidian trash?");
 
-		this.files.forEach(file => contentEl.createEl("p", {
-			attr: {
-				"style": "line-height: 10px;",
-			},
-			text: file.path
-		}));
+		this.files.forEach(file => {
+			contentEl.createEl("p", {
+				cls: "trash-modal-file-link",
+				text: file.path
+			}).addEventListener("click", async (e) => {
+				this.close();
+				await this.app.workspace.activeLeaf.openFile(file);
+			});
+		});
+
+		// move the filenames away from the buttons for readability
+		contentEl.createEl("br");
 
 		contentEl.createEl("button", { text: "Cancel" })
 			.addEventListener("click", () => this.close());
 
 		contentEl.createEl("button", {
 			cls: ["mod-cta", "modal-confirm-button"],
-			attr: {
-				"style": "float: right;",
-			},
 			text: "Confirm"
 		}).addEventListener("click", async () => {
 			for (const file of this.files) {

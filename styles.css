@@ -1,0 +1,14 @@
+.modal-confirm-button {
+    float: right;
+}
+
+.trash-modal-file-link {
+    line-height: 10px;
+    color: var(--text-accent);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.trash-modal-file-link:hover {
+    color: var(--text-accent-hover, var(--text-accent));
+}
