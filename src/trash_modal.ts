@@ -24,11 +24,20 @@ export class TrashFilesModal extends Modal {
 		// move the filenames away from the buttons for readability
 		contentEl.createEl("br");
 
-		contentEl.createEl("button", { text: "Cancel" })
-			.addEventListener("click", () => this.close());
+		contentEl.createEl("p", {
+			cls: "trash-modal-file-link",
+			text: "Copy list to clipboard"
+		}).addEventListener("click", async (e) => {
+			await navigator.clipboard.writeText(this.files.map(file => file.path).join("\n"));
+			new Notice("Copied list to clipboard");
+		});
 
 		contentEl.createEl("button", {
-			cls: ["mod-cta", "modal-confirm-button"],
+			text: "Cancel"
+		}).addEventListener("click", () => this.close());
+
+		contentEl.createEl("button", {
+			cls: ["mod-cta", "trash-modal-button"],
 			text: "Confirm"
 		}).addEventListener("click", async () => {
 			for (const file of this.files) {
