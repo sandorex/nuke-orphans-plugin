@@ -2,6 +2,7 @@ name: Release Obsidian Plugin
 
 # to make a release:
 # increment version in manifest.json package.json and versions.json
+# $ npm i # to update package-lock.json (optional)
 # $ git commit
 # $ git tag <VERSION>
 # $ git push && git push --tags
