@@ -1,4 +1,4 @@
-import { Plugin, TFile } from "obsidian";
+import { Notice, Plugin, TFile } from "obsidian";
 import { DEFAULT_SETTINGS, NukeOrhpansSettingsTab, NukeOrphansSettings } from "./settings";
 import { TrashFilesModal } from "./trash_modal";
 
@@ -26,12 +26,12 @@ export default class NukeOrphansPlugin extends Plugin {
 
 		if (files.length > 0)
 			new TrashFilesModal(this.app, files).open();
+		else
+			new Notice("No files were trashed");
 	}
 
 	async onload() {
 		await this.loadSettings();
-
-		console.log("Loaded plugin " + this.manifest.name + " " + this.manifest.version);
 
 		this.addCommand({
 			id: "nuke-orphaned-attachments",
@@ -39,6 +39,13 @@ export default class NukeOrphansPlugin extends Plugin {
 			callback: () => {
 				this.trash(this.getOrphans().filter(file => this.isAttachment(file), this))
 			},
+		});
+
+		this.addCommand({
+			id: "nuke-orphaned-notes",
+			name: "Trash orphaned notes",
+			callback: () =>
+				this.trash(this.getOrphans().filter(file => file.extension == "md")),
 		});
 
 		this.addCommand({

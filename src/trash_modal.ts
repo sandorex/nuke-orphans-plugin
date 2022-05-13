@@ -1,4 +1,4 @@
-import { App, Modal, TFile } from "obsidian";
+import { App, Modal, Notice, TFile } from "obsidian";
 
 export class TrashFilesModal extends Modal {
 	files: TFile[];
@@ -31,6 +31,8 @@ export class TrashFilesModal extends Modal {
 			for (const file of this.files) {
 				await this.app.vault.trash(file, false);
 			}
+
+			new Notice("Trashed " + this.files.length + " files");
 
 			this.close();
 		});
