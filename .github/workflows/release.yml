@@ -1,0 +1,63 @@
+name: Release Obsidian Plugin
+
+# to make a release:
+# increment version in manifest.json package.json and versions.json
+# $ git commit
+# $ git tag <VERSION>
+# $ git push && git push --tags
+
+# push only on tags
+on:
+  push:
+    tags:
+    - '*'
+
+permissions:
+  contents: write
+
+env:
+  PLUGIN_NAME: nuke-orphans
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '16.x'
+
+    # Get the version from git tag
+    - name: Get Version
+      id: version
+      run: |
+        echo "::set-output name=tag::$(git describe --abbrev=0 --tags)"
+
+    # Build the plugin
+    - name: Build
+      id: build
+      run: |
+        npm install
+        npm run build --if-present
+
+    # Package the required files into a zip
+    - name: Package
+      run: |
+        mkdir ${{ env.PLUGIN_NAME }}
+        cp main.js manifest.json styles.css README.md ${{ env.PLUGIN_NAME }}
+        zip -r ${{ env.PLUGIN_NAME }}-${{ steps.version.outputs.tag }}.zip ${{ env.PLUGIN_NAME }}
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Version ${{ steps.version.outputs.tag }}
+        fail_on_unmatched_files: yes
+        files: |
+          ${{ env.PLUGIN_NAME }}-${{ steps.version.outputs.tag }}.zip
+          manifest.json
+          main.js
+          styles.css
