@@ -50,7 +50,7 @@ jobs:
       run: |
         mkdir ${{ env.PLUGIN_NAME }}
         cp main.js manifest.json styles.css README.md ${{ env.PLUGIN_NAME }}
-        zip -r ${{ env.PLUGIN_NAME }}-${{ steps.version.outputs.tag }}.zip ${{ env.PLUGIN_NAME }}
+        zip -r ${{ env.PLUGIN_NAME }}.zip ${{ env.PLUGIN_NAME }}
 
     - name: Release
       uses: softprops/action-gh-release@v1
@@ -58,7 +58,7 @@ jobs:
         name: Version ${{ steps.version.outputs.tag }}
         fail_on_unmatched_files: yes
         files: |
-          ${{ env.PLUGIN_NAME }}-${{ steps.version.outputs.tag }}.zip
+          ${{ env.PLUGIN_NAME }}.zip
           manifest.json
           main.js
           styles.css
