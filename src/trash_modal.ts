@@ -31,7 +31,10 @@ export class TrashFilesModal extends Modal {
 
 		contentEl.createEl("button", {
 			text: "Copy to clipboard",
-		}).addEventListener("click", () => this.close());
+		}).addEventListener("click", async () => {
+			await navigator.clipboard.writeText(this.files.map(file => file.path).join("\n"));
+			new Notice("Copied list to clipboard");
+		});
 
 		contentEl.createEl("button", {
 			cls: ["mod-cta", "trash-modal-button"],
