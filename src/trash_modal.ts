@@ -11,9 +11,13 @@ export class TrashFilesModal extends Modal {
 		let { contentEl, titleEl } = this;
 		titleEl.setText("Move " + this.files.length + " files to obsidian trash?");
 
+		const div = contentEl.createDiv({
+			cls: "trash-modal-file-links",
+		})
+
 		this.files.forEach(file => {
-			contentEl.createEl("p", {
-				cls: "trash-modal-file-link",
+			div.createEl("p", {
+				cls: "trash-modal-link",
 				text: file.path
 			}).addEventListener("click", async (e) => {
 				this.close();
@@ -21,16 +25,13 @@ export class TrashFilesModal extends Modal {
 			});
 		});
 
-		// move the filenames away from the buttons for readability
-		contentEl.createEl("br");
+		contentEl.createEl("button", {
+			text: "Copy to clipboard",
+			cls: "trash-modal-center-button"
+		}).addEventListener("click", () => this.close());
 
-		contentEl.createEl("p", {
-			cls: "trash-modal-file-link",
-			text: "Copy list to clipboard"
-		}).addEventListener("click", async (e) => {
-			await navigator.clipboard.writeText(this.files.map(file => file.path).join("\n"));
-			new Notice("Copied list to clipboard");
-		});
+		contentEl.createEl("br");
+		contentEl.createEl("br");
 
 		contentEl.createEl("button", {
 			text: "Cancel"

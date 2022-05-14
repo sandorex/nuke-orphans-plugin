@@ -22,8 +22,6 @@ export default class NukeOrphansPlugin extends Plugin {
 
 	// asks the user to trash following files
 	trash(files: TFile[]) {
-		console.log("Trashing %d files", files.length);
-
 		if (files.length > 0)
 			new TrashFilesModal(this.app, files).open();
 		else
