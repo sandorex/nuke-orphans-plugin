@@ -5,6 +5,7 @@
 .trash-modal-file-links {
     overflow-y: scroll;
     max-height: 30vw;
+    margin: 1vw;
 }
 
 .trash-modal-link {
