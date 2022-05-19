@@ -1,12 +1,12 @@
-import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting } from "obsidian";
 import NukeOrphansPlugin from "./main";
 
 export interface NukeOrphansSettings {
-	attachmentsPath: string;
+	attachmentsPath: string,
 }
 
 export const DEFAULT_SETTINGS: NukeOrphansSettings = {
-	attachmentsPath: "/",
+	attachmentsPath: "", // get from config by default
 }
 
 export class NukeOrhpansSettingsTab extends PluginSettingTab {
@@ -31,39 +31,15 @@ export class NukeOrhpansSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Attachment Folder")
-			.setDesc("Where attachments are stored")
+			.setDesc("Where attachments are stored (if empty reads value in obsidian config)")
 			.addText(text =>
-				text.setPlaceholder(DEFAULT_SETTINGS.attachmentsPath)
+				text.setPlaceholder(this.app.vault.config.attachmentFolderPath)
 					.setValue(this.plugin.settings.attachmentsPath)
 					.onChange(async (value) => {
 						// TODO: test if path is valid '/x/y/z' or './x'
 
-						if (value.length == 0)
-							this.plugin.settings.attachmentsPath = DEFAULT_SETTINGS.attachmentsPath;
-						else
-							this.plugin.settings.attachmentsPath = value;
-
+						this.plugin.settings.attachmentsPath = value;
 						await this.plugin.saveSettings();
-					}))
-			.addButton(btn => {
-				btn.setButtonText("From config")
-					.setCta()
-					.onClick(async () => {
-						// WARNING: this uses non public API and so may break in the future
-						// @ts-ignore
-						if (typeof this.app.vault.config.attachmentFolderPath !== "undefined") {
-							console.log("Reading attachmentFolderPath from obsidian config")
-
-							// @ts-ignore
-							this.plugin.settings.attachmentsPath = this.app.vault.config.attachmentFolderPath;
-							await this.plugin.saveSettings();
-
-							// refresh the tab so that the updated value is shown
-							this.display();
-						} else {
-							new Notice("Could not read attachmentFolderPath from config")
-						}
-					})
-			});
+					}));
 	}
 }

@@ -9,7 +9,7 @@ export class TrashFilesModal extends Modal {
 
 	onOpen() {
 		let { contentEl, titleEl } = this;
-		titleEl.setText("Move " + this.files.length + " files to obsidian trash?");
+		titleEl.setText("Move " + this.files.length + " files to trash?");
 
 		const div = contentEl.createDiv({
 			cls: "trash-modal-file-links",
@@ -41,7 +41,7 @@ export class TrashFilesModal extends Modal {
 			text: "Trash"
 		}).addEventListener("click", async () => {
 			for (const file of this.files) {
-				await this.app.vault.trash(file, false);
+				await this.app.vault.trash(file, this.app.vault.config.trashOption);
 			}
 
 			new Notice("Trashed " + this.files.length + " files");

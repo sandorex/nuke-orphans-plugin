@@ -5,27 +5,33 @@ import { TrashFilesModal } from "./trash_modal";
 export default class NukeOrphansPlugin extends Plugin {
 	settings: NukeOrphansSettings;
 
-	// check if the file is an attachment
+	getAttachmentsPath(): string {
+		if (this.settings.attachmentsPath.length === 0)
+			return this.app.vault.config.attachmentFolderPath;
+
+		return this.settings.attachmentsPath;
+	}
+
 	isAttachment(file: TFile): boolean {
 		if (this.settings.attachmentsPath.startsWith("./"))
-			return file.parent.name == this.settings.attachmentsPath.substring(2);
+			return file.parent.name == this.getAttachmentsPath().substring(2);
 
-		return file.parent.path == this.settings.attachmentsPath;
+		return file.parent.path == this.getAttachmentsPath();
 	}
 
 	// returns list of files that are not linked by any file
 	getOrphans(): TFile[] {
-		const links = new Set<string>(Object.entries(this.app.metadataCache.resolvedLinks).flatMap(x => Object.entries(x[1]).map(y => y[0])));
+		const links = new Set<string>(Object.values(this.app.metadataCache.resolvedLinks).flatMap(x => Object.keys(x)));
 
 		return this.app.vault.getFiles().filter(file => !links.has(file.path));
 	}
 
-	// asks the user to trash following files
+	// asks the user to trash files
 	trash(files: TFile[]) {
 		if (files.length > 0)
 			new TrashFilesModal(this.app, files).open();
 		else
-			new Notice("No files were trashed");
+			new Notice("No orphaned files have been found");
 	}
 
 	async onload() {
@@ -35,7 +41,7 @@ export default class NukeOrphansPlugin extends Plugin {
 			id: "nuke-orphaned-attachments",
 			name: "Trash orphaned attachments",
 			callback: () => {
-				this.trash(this.getOrphans().filter(file => this.isAttachment(file), this))
+				this.trash(this.getOrphans().filter(file => this.isAttachment(file)))
 			},
 		});
 
@@ -43,7 +49,7 @@ export default class NukeOrphansPlugin extends Plugin {
 			id: "nuke-orphaned-notes",
 			name: "Trash orphaned notes",
 			callback: () =>
-				this.trash(this.getOrphans().filter(file => file.extension == "md")),
+				this.trash(this.getOrphans().filter(file => file.extension === "md")),
 		});
 
 		this.addCommand({
