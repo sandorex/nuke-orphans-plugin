@@ -72,7 +72,7 @@ export default class NukeOrphansPlugin extends Plugin {
 	// asks the user to trash files
 	trash(files: TFile[]) {
 		if (files.length > 0)
-			new TrashFilesModal(this.app, files, this.settings.trashFolderOverride).open();
+			new TrashFilesModal(this.app, files, this.settings.trashFolderOverride, this.shouldUseSystemTrash()).open();
 		else
 			new Notice("No orphaned files have been found");
 	}
