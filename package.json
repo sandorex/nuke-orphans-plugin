@@ -1,6 +1,6 @@
 {
 	"name": "nuke-orphans",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "Plugin that trashes orphaned files and attachments",
 	"main": "main.js",
 	"scripts": {
