@@ -4,7 +4,7 @@ declare module "obsidian" {
 	interface Vault {
 		config: {
 			attachmentFolderPath: string,
-			trashOption: boolean,
+			trashOption: string,
 		}
 	}
 }

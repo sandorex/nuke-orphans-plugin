@@ -18,3 +18,11 @@
 .trash-modal-link:hover {
     color: var(--text-accent-hover, var(--text-accent));
 }
+
+.nuke-orphans-pass {
+    color: lightgreen !important;
+}
+
+.nuke-orphans-fail {
+    color: red !important;
+}
