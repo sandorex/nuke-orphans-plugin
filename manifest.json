@@ -1,8 +1,8 @@
 {
 	"id": "nuke-orphans",
 	"name": "Nuke Orphans",
-	"version": "1.2.1",
-	"minAppVersion": "0.12.0",
+	"version": "1.2.2",
+	"minAppVersion": "1.0.0",
 	"description": "Plugin that trashes orphaned files and attachments",
 	"author": "Sandorex",
 	"authorUrl": "https://github.com/sandorex",

@@ -46,18 +46,22 @@ export default class NukeOrphansPlugin extends Plugin {
 		}
 	}
 
-	getAttachmentsPath(): string {
-		if (this.settings.attachmentsPath.length === 0)
-			return this.app.vault.config.attachmentFolderPath;
+	getAttachmentsPaths(): string[] {
+		if (this.settings.attachmentsPaths.length === 0)
+			return [this.app.vault.config.attachmentFolderPath];
 
-		return this.settings.attachmentsPath;
+		return this.settings.attachmentsPaths;
 	}
 
 	isAttachment(file: TFile): boolean {
-		if (this.settings.attachmentsPath.startsWith("./"))
-			return file.parent.name == this.getAttachmentsPath().substring(2);
+		return this.getAttachmentsPaths().some(element => {
+			console.log(file.path, file.parent.name, element, element.substring(2))
+			if (element.startsWith("./") && file.parent.name == element.substring(2))
+				return true;
 
-		return file.parent.path == this.getAttachmentsPath();
+			if (file.parent.path == element)
+				return true;
+		});
 	}
 
 	// returns list of files that are not linked by any file

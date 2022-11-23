@@ -2,13 +2,13 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import NukeOrphansPlugin from "./main";
 
 export interface NukeOrphansSettings {
-	attachmentsPath: string,
+	attachmentsPaths: string[],
 	trashFolderOverride: string,
 	ignorePatterns: string[],
 }
 
 export const DEFAULT_SETTINGS: NukeOrphansSettings = {
-	attachmentsPath: "", // get from config by default
+	attachmentsPaths: [], // get from config by default
 	trashFolderOverride: "",
 	ignorePatterns: [],
 }
@@ -39,13 +39,13 @@ export class NukeOrphansSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Override Attachment Folder")
 			.setDesc("Where attachments are stored")
-			.addText(text =>
+			.addTextArea(text =>
 				text.setPlaceholder(this.app.vault.config.attachmentFolderPath)
-					.setValue(this.plugin.settings.attachmentsPath)
+					.setValue(this.plugin.settings.attachmentsPaths.join('\n'))
 					.onChange(async (value) => {
 						// TODO: test if path is valid '/x/y/z' or './x'
 
-						this.plugin.settings.attachmentsPath = value;
+						this.plugin.settings.attachmentsPaths = value.split('\n').map(x => x.trim()).filter(x => x.length > 0);
 						await this.plugin.saveSettings();
 					}));
 
