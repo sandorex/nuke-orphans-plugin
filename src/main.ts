@@ -1,4 +1,4 @@
-import { Notice, Plugin, TFile } from "obsidian";
+import { Notice, Plugin, TFile, CanvasData } from "obsidian";
 import { DEFAULT_SETTINGS, NukeOrphansSettings, NukeOrphansSettingsTab } from "./settings";
 import { TrashFilesModal } from "./trash_modal";
 
@@ -55,7 +55,6 @@ export default class NukeOrphansPlugin extends Plugin {
 
 	isAttachment(file: TFile): boolean {
 		return this.getAttachmentsPaths().some(element => {
-			console.log(file.path, file.parent.name, element, element.substring(2))
 			if (element.startsWith("./") && file.parent.name == element.substring(2))
 				return true;
 
@@ -64,13 +63,40 @@ export default class NukeOrphansPlugin extends Plugin {
 		});
 	}
 
+	// returns all files linked from canvases
+	async getCanvasLinks(): Promise<Set<string>> {
+		let links = new Set<string>();
+
+		// go over all canvas files
+		await Promise.all(this.app.vault.getFiles().filter(f => f.extension === 'canvas').map(async (f) => {
+			const content = await this.app.vault.read(f);
+
+			// parse as a canvas (its just json)
+			try {
+				const canvas: CanvasData = JSON.parse(content);
+
+				// get all linked files
+				canvas.nodes.filter(node => node.type === 'file').forEach(node => links.add(node.file));
+			} catch (e) {
+				console.error("Error parsing canvas file " + f.path + "\n", e);
+			}
+
+			return Promise.resolve();
+		}));
+
+		return links;
+	}
+
 	// returns list of files that are not linked by any file
-	getOrphans(): TFile[] {
+	async getOrphans(): Promise<TFile[]> {
 		const links = new Set<string>(Object.values(this.app.metadataCache.resolvedLinks).flatMap(x => Object.keys(x)));
+		const canvasLinks = await this.getCanvasLinks();
 		const filter = this.getIgnoreFilter();
 
-		return this.app.vault.getFiles().filter(file =>
-			!links.has(file.path) && !filter.test(file.path));
+		return this.app.vault.getFiles().filter(file => {
+				return ![links.has(file.path), canvasLinks.has(file.path), filter.test(file.path)].some(x => x === true);
+			}
+		);
 	}
 
 	// asks the user to trash files
@@ -87,22 +113,22 @@ export default class NukeOrphansPlugin extends Plugin {
 		this.addCommand({
 			id: "nuke-orphaned-attachments",
 			name: "Trash orphaned attachments",
-			callback: () =>
-				this.trash(this.getOrphans().filter(file => this.isAttachment(file))),
+			callback: async () =>
+				this.trash((await this.getOrphans()).filter(file => this.isAttachment(file))),
 		});
 
 		this.addCommand({
 			id: "nuke-orphaned-notes",
 			name: "Trash orphaned notes",
-			callback: () =>
-				this.trash(this.getOrphans().filter(file => file.extension === "md")),
+			callback: async () =>
+				this.trash((await this.getOrphans()).filter(file => file.extension === "md")),
 		});
 
 		this.addCommand({
 			id: "nuke-orphaned",
 			name: "Trash orphaned files",
-			callback: () =>
-				this.trash(this.getOrphans()),
+			callback: async () =>
+				this.trash(await this.getOrphans()),
 		});
 
 		this.addSettingTab(new NukeOrphansSettingsTab(this.app, this));

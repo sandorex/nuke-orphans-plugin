@@ -1,0 +1,7 @@
+{
+	"nodes":[
+		{"id":"416945f62f3e0a2b","x":-145,"y":-70,"width":250,"height":60,"type":"text","text":"This canvas is not linked"},
+		{"type":"file","file":"Linked Note In Canvas.md","id":"3936c2558197baa5","x":-220,"y":-540,"width":400,"height":400}
+	],
+	"edges":[]
+}
