@@ -55,11 +55,16 @@ export default class NukeOrphansPlugin extends Plugin {
 
 	isAttachment(file: TFile): boolean {
 		return this.getAttachmentsPaths().some(element => {
-			if (element.startsWith("./") && file.parent.name == element.substring(2))
-				return true;
+			let cur = file;
+			while (cur.parent) {
+				if (element.startsWith("./") && cur.parent.name == element.substring(2))
+					return true;
+	
+				if (cur.parent.path == element)
+					return true;
 
-			if (file.parent.path == element)
-				return true;
+				cur = cur.parent;
+			}
 		});
 	}
 
