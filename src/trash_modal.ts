@@ -25,7 +25,7 @@ export class TrashFilesModal extends Modal {
 			div.createEl("p", {
 				cls: "trash-modal-link",
 				text: file.path
-			}).addEventListener("click", async (e) => {
+			}).addEventListener("click", async () => {
 				this.close();
 				await this.app.workspace.activeLeaf.openFile(file);
 			});
@@ -34,11 +34,13 @@ export class TrashFilesModal extends Modal {
 		});
 
 		contentEl.createEl("button", {
+			cls: ["trash-modal-button"],
 			text: "Cancel"
 		}).addEventListener("click", () => this.close());
 
 		contentEl.createEl("button", {
-			text: "Copy to clipboard",
+			cls: ["trash-modal-button"],
+			text: "Copy list to clipboard",
 		}).addEventListener("click", async () => {
 			await navigator.clipboard.writeText(this.files.map(file => file.path).join("\n"));
 			new Notice("Copied list to clipboard");

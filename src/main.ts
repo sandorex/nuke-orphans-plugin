@@ -55,11 +55,14 @@ export default class NukeOrphansPlugin extends Plugin {
 
 	isAttachment(file: TFile): boolean {
 		return this.getAttachmentsPaths().some(element => {
-			if (element.startsWith("./") && file.parent.name == element.substring(2))
-				return true;
-
 			if (file.parent.path == element)
 				return true;
+
+			// as there is no nodejs path i am using string comparison
+			if (file.path.startsWith(element))
+				return true;
+
+			return false;
 		});
 	}
 
@@ -93,10 +96,20 @@ export default class NukeOrphansPlugin extends Plugin {
 		const canvasLinks = await this.getCanvasLinks();
 		const filter = this.getIgnoreFilter();
 
+		// filtering all files, expensive but its not often done
 		return this.app.vault.getFiles().filter(file => {
-				return ![links.has(file.path), canvasLinks.has(file.path), filter.test(file.path)].some(x => x === true);
-			}
-		);
+			// using some just in case any command returns undefined or smth
+			return ![
+				// does any note link to it
+				links.has(file.path),
+
+				// does any canvas link to it
+				canvasLinks.has(file.path),
+
+				// is it ignored in the regex filter
+				filter.test(file.path)
+			].some(x => x === true);
+		});
 	}
 
 	// asks the user to trash files

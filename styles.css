@@ -1,4 +1,10 @@
 .trash-modal-button {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+/* this is the confirm button so it should be separated */
+.trash-modal-button:last-of-type {
     float: right;
 }
 
@@ -9,7 +15,6 @@
 }
 
 .trash-modal-link {
-    line-height: 10px;
     color: var(--text-accent);
     text-decoration: underline;
     cursor: pointer;
