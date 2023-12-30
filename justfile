@@ -7,7 +7,8 @@ dev:
 # bumps the version file
 #
 # how to use:
-# edit manifest.json and change version and min version then run this and then
-# add git tag without any prefixes and push
+# - edit package.json and change version
+# - run `just version`
+# - add git tag without any prefixes and push --tags
 version:
 	npm run version
