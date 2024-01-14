@@ -5,12 +5,14 @@ export interface NukeOrphansSettings {
 	attachmentsPaths: string[],
 	trashFolderOverride: string,
 	ignorePatterns: string[],
+	alternativeAttachmentAlg: boolean,
 }
 
 export const DEFAULT_SETTINGS: NukeOrphansSettings = {
 	attachmentsPaths: [], // get from config by default
 	trashFolderOverride: "",
 	ignorePatterns: [],
+	alternativeAttachmentAlg: false,
 }
 
 const CSS_CLASS_CHECK_PASS = "nuke-orphans-pass"
@@ -97,5 +99,23 @@ export class NukeOrphansSettingsTab extends PluginSettingTab {
 				// trigger color update on refocus
 				text.inputEl.addEventListener("focusin", () => text.onChanged());
 			});
+
+		containerEl.createEl("h3", {
+			attr: {
+				style: "font-weight: bold"
+			},
+			text: "Advanced Settings"
+		});
+
+		new Setting(containerEl)
+			.setName("Alternative Attachments Finding Algorithm")
+			.setDesc("Try enabling this if attachments are not found in subfolders")
+			.addToggle(btn =>
+				btn.setValue(this.plugin.settings.alternativeAttachmentAlg)
+					.onChange(async value => {
+						this.plugin.settings.alternativeAttachmentAlg = value;
+
+						await this.plugin.saveSettings();
+					}));
 	}
 }

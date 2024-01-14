@@ -1,22 +1,25 @@
-import { Notice, Plugin, TFile, CanvasData } from "obsidian";
+import { Notice, Plugin, TFile, TFolder, CanvasData } from "obsidian";
 import { DEFAULT_SETTINGS, NukeOrphansSettings, NukeOrphansSettingsTab } from "./settings";
 import { TrashFilesModal } from "./trash_modal";
 
 /**
- * class that holds regexes, used for prebuilding regexes when filtering
+ * class that holds filters, both regex and string based
  */
-class RegexFilter {
+class CustomFilter {
+	// regex expressions that are filtered out
 	private readonly regexes: Set<RegExp>;
 
-	constructor(ignoredPaths: string[]) {
-		this.regexes = new Set<RegExp>(ignoredPaths.map(x => RegExp(x)));
+	// literal values that are filtered out
+	private readonly strings: Set<string>;
+
+	constructor(regexes: string[], strings: string[]) {
+		this.regexes = new Set<RegExp>(regexes.map(x => RegExp(x)));
+		this.strings = new Set<string>(strings)
 	}
 
-	/**
-	 * tests if any regex in filter matches in input
-	 */
 	public test(input: string): boolean {
-		return Array.from(this.regexes).some(x => x.test(input));
+		return Array.from(this.regexes).some(x => x.test(input)) ||
+			Array.from(this.strings).some(x => x === input);
 	}
 }
 
@@ -24,15 +27,14 @@ export default class NukeOrphansPlugin extends Plugin {
 	settings: NukeOrphansSettings;
 
 	// gets the filter that is filled with ignore path patterns
-	getIgnoreFilter(): RegexFilter {
-		// copy the paths!
-		let patterns = [...this.settings.ignorePatterns];
+	getIgnoreFilter(): CustomFilter {
+		let strings = [];
 
-		// TODO: dirty fix to always ignore trash folder
+		// ignore the trash folder if set
 		if (this.settings.trashFolderOverride.length > 0)
-			patterns.push("^" + this.settings.trashFolderOverride);
+			strings.push(this.settings.trashFolderOverride)
 
-		return new RegexFilter(patterns);
+		return new CustomFilter(this.settings.ignorePatterns, strings);
 	}
 
 	shouldUseSystemTrash(): boolean {
@@ -55,12 +57,36 @@ export default class NukeOrphansPlugin extends Plugin {
 
 	isAttachment(file: TFile): boolean {
 		return this.getAttachmentsPaths().some(element => {
-			if (file.parent.path == element)
-				return true;
+			console.log(file.path)
+			// subfolder attachment folder
+			if (element.startsWith("./")) {
+				// use the hacky algorithm by default but allow switching
+				//
+				// normal users should not care about this but would allow me
+				// to debug easier without changing too much code if some edge
+				// case were to develop over time
+				if (this.settings.alternativeAttachmentAlg) {
+					// check each parent to see if it is an attachment
+					let path: TFolder = file.parent;
+					while (path.name !== undefined && path.name.length > 0) {
+						if (path.name == element.substring(2))
+							return true;
 
-			// as there is no nodejs path i am using string comparison
-			if (file.path.startsWith(element))
-				return true;
+						path = path.parent;
+					}
+				} else {
+					// hacky but should work fine, checking if attachments/ is
+					// present in full path like '/something/else/attachments/xx.txt'
+					return file.path.startsWith(element.substring(2)) ||
+						file.path.contains(element.substring(1) + "/")
+				}
+			} else {
+				if (file.parent.path == element)
+					return true;
+
+				if (file.path.startsWith(element))
+					return true;
+			}
 
 			return false;
 		});
@@ -126,22 +152,28 @@ export default class NukeOrphansPlugin extends Plugin {
 		this.addCommand({
 			id: "nuke-orphaned-attachments",
 			name: "Trash orphaned attachments",
-			callback: async () =>
-				this.trash((await this.getOrphans()).filter(file => this.isAttachment(file))),
+			callback: async () => {
+				new Notice("Gathering orphaned attachments..");
+				this.trash((await this.getOrphans()).filter(file => this.isAttachment(file)));
+			},
 		});
 
 		this.addCommand({
 			id: "nuke-orphaned-notes",
 			name: "Trash orphaned notes",
-			callback: async () =>
-				this.trash((await this.getOrphans()).filter(file => file.extension === "md")),
+			callback: async () => {
+				new Notice("Gathering orphaned notes..");
+				this.trash((await this.getOrphans()).filter(file => file.extension === "md"));
+			},
 		});
 
 		this.addCommand({
 			id: "nuke-orphaned",
 			name: "Trash orphaned files",
-			callback: async () =>
-				this.trash(await this.getOrphans()),
+			callback: async () => {
+				new Notice("Gathering orphaned files..");
+				this.trash(await this.getOrphans())
+			},
 		});
 
 		this.addSettingTab(new NukeOrphansSettingsTab(this.app, this));
